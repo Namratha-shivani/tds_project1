@@ -1,0 +1,3 @@
+#/bin/sh
+
+wget --recursive --page-requisites --convert-links $1

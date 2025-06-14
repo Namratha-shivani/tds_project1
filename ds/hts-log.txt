@@ -1,0 +1,12 @@
+HTTrack3.49-2 launched on Sat, 14 Jun 2025 15:48:53 at https://study.iitm.ac.in/ds/ +*.study.iitm.ac.in/ds/*
+(httrack https://study.iitm.ac.in/ds/ -O ./ds +*.study.iitm.ac.in/ds/* -r3 )
+
+Information, Warnings and Errors reported for this mirror:
+note:	the hts-log.txt file, and hts-cache folder, may contain sensitive information,
+	such as username/password authentication for websites mirrored in this project
+	do not share these files/folders if you want these information to remain private
+
+15:51:57	Error: 	"Not Found" (404) at link https://study.iitm.ac.in/ds/academic.html (from https://study.iitm.ac.in/ds/faq.html)
+
+HTTrack Website Copier/3.49-2 mirror complete in 3 minutes 4 seconds : 172 links scanned, 170 files written (18244446 bytes overall) [13352790 bytes received at 72569 bytes/sec], 6324412 bytes transferred using HTTP compression in 104 files, ratio 20%
+(1 errors, 0 warnings, 0 messages)

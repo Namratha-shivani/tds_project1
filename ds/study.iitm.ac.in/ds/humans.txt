@@ -1,0 +1,29 @@
+/* TEAM */
+
+    Lead: Thejesh GN
+    Contact: i@thejeshgn.com
+    Site: https://thejeshgn.com
+    From: Bengaluru, India
+
+    Desinger: Sudharsha Subbiah
+    Contact: siddhant@onlinedegree.iitm.ac.in
+
+    Team Lead: Siddhant Shrivastav
+    Contact: siddhant@onlinedegree.iitm.ac.in
+
+    Developer: Santhana Krishnan
+    Contact: krishnan@onlinedegree.iitm.ac.in
+
+    Developer: Sankara Narayanan
+    Contact: sankaranarayanan@study.iitm.ac.in
+
+    Tester: Prabuddh Mathur
+	Contact: prabuddh@study.iitm.ac.in
+ 
+/* THANKS */
+
+    Developer: Sharabesh J 
+
+    Developer: Sudhanshu Kumar
+    
+    Developer: Shubham Arora

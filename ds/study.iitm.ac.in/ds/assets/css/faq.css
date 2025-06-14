@@ -1,0 +1,90 @@
+.notificationText {
+    font-size: 0.9rem
+}
+
+
+#footer {
+    background-color: #B71006 !important;
+}
+
+.scrollToTop {
+    display: none;
+    position: fixed;
+    right: 30px;
+    bottom: 20px;
+    z-index: 99;
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+    border-radius: 10px;
+    padding: 15px;
+    outline: none;
+    border: none;
+}
+
+.faqContent {
+    padding: 0 1rem;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+.tooltipv2 {
+  position: relative;
+  display: inline-block;
+}
+
+.footer-text {
+    font-size: 0.9rem;
+}
+
+.xl\+notification {
+    display: block;
+}
+
+.xl-notification {
+    display: none;
+}
+
+.text-small {
+    font-size: 0.8rem;
+}
+
+@media screen and (max-width: 573px) {
+    p,a,b,span,button,td, div {
+        font-size: 1.25rem;
+    }
+    .text-small {
+        font-size: 1rem;
+    }
+    .notificationText {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .xl\+notification {
+        display: none;
+    }
+    .xl-notification {
+        display: block;
+    }
+    .remindMe {
+        display: flex;
+        justify-content: center;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    .footer-text {
+        font-size: 1rem;
+    }
+    .footer-text-small {
+        font-size: 0.9rem;
+    }
+    .remindText {
+        text-align: center;
+        width: 100%;
+    }
+    .footer-hidden {
+        display: block;
+    }
+}

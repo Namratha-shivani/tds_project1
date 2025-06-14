@@ -1,166 +1,145 @@
-from flask import Flask, request, jsonify
-import asyncio
-from playwright.async_api import async_playwright
-from bs4 import BeautifulSoup
-import re
-import requests
-from sentence_transformers import SentenceTransformer, util
+# app.py for creating an answering app
+import os
+import io
+import base64
 import pytesseract
 from PIL import Image
-from io import BytesIO
-import base64
-import torch
+from dotenv import load_dotenv
+from fastapi import FastAPI, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from typing import List, Optional
+from bs4 import BeautifulSoup
+import openai
+import numpy as np
+import faiss
 
-app = Flask(__name__)
-model = SentenceTransformer("all-MiniLM-L6-v2")
-source_data = []
+# Load environment
+load_dotenv()
+openai.api_base = "https://aipipe.org/v1" 
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-MAIN_URL = "https://tds.s-anand.net/#/2025-01/"
-DISCOURSE_URL = "https://discourse.onlinedegree.iitm.ac.in/c/courses/tds-kb/34"
+app = FastAPI()
 
-async def fetch_all_sections_text_and_images(url):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        await page.goto(url)
-        await page.wait_for_timeout(5000)
+# Allow frontend calls (optional)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-        async def extract_text_and_images_from_page():
-            content = await page.content()
-            soup = BeautifulSoup(content, "html.parser")
-            texts = [tag.get_text(strip=True) for tag in soup.find_all(['p', 'div', 'span', 'li']) if len(tag.get_text(strip=True)) > 50]
-            images = [
-                requests.compat.urljoin(url, img['src']) 
-                for img in soup.find_all('img', src=True)
-            ]
-            return texts, images
+# Folders containing local HTML files (wget output)
+HTML_FOLDERS = ["./discourse.onlinedegree.iitm.ac.in", "./tds.s-anand.net"]
 
-        all_texts, all_images = await extract_text_and_images_from_page()
-        section_buttons = await page.query_selector_all("a[href^='#/2025-']")
-        visited = set()
+docs = []
+doc_sources = []
 
-        for btn in section_buttons:
-            try:
-                href = await btn.get_attribute('href')
-                if href in visited:
-                    continue
-                visited.add(href)
-                await btn.click()
-                await page.wait_for_timeout(2000)
-                texts, images = await extract_text_and_images_from_page()
-                all_texts.extend(texts)
-                all_images.extend(images)
-            except Exception as e:
-                print(f"Section error: {e}")
-        await browser.close()
-        return all_texts, all_images
+EMBED_MODEL = "text-embedding-ada-002"
+DIMENSION = 1536
 
-async def fetch_rendered_html(url):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        await page.goto(url)
-        await page.wait_for_timeout(5000)
-        html = await page.content()
-        await browser.close()
-        return html
+def load_html_chunks():
+    for folder in HTML_FOLDERS:
+        for root, _, files in os.walk(folder):
+            for file in files:
+                if file.endswith(".html"):
+                    filepath = os.path.join(root, file)
+                    with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                        soup = BeautifulSoup(f, "html.parser")
 
-def ocr_image_from_url(url):
-    try:
-        resp = requests.get(url, timeout=10)
-        img = Image.open(BytesIO(resp.content))
-        return pytesseract.image_to_string(img).strip()
-    except Exception as e:
-        print(f"OCR failed for image {url}: {e}")
-        return ""
+                        # Extract known semantic content blocks
+                        # This will catch Discourse and blog-like formats
+                        content_blocks = soup.find_all(['article', 'section', 'div'], recursive=True)
 
-def ocr_image_from_base64(image_data):
-    try:
-        header_removed = re.sub('^data:image/.+;base64,', '', image_data)
-        img_bytes = base64.b64decode(header_removed)
-        img = Image.open(BytesIO(img_bytes))
-        return pytesseract.image_to_string(img).strip()
-    except Exception as e:
-        print(f"OCR failed on base64 image: {e}")
-        return ""
+                        for block in content_blocks:
+                            # Optional: Filter based on class for known structures like Discourse
+                            if block.has_attr("class"):
+                                class_str = " ".join(block.get("class"))
+                                if "cooked" not in class_str and "post" not in class_str:
+                                    continue  # skip unrelated divs
 
-def load_data():
-    print("Scraping all sections and processing content...")
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+                            text = block.get_text(separator=" ", strip=True)
+                            if text and len(text) > 50:  # Avoid junk
+                                docs.append(text)
+                                doc_sources.append(filepath)
 
-    tds_texts, tds_images = loop.run_until_complete(fetch_all_sections_text_and_images(MAIN_URL))
-    discourse_html = loop.run_until_complete(fetch_rendered_html(DISCOURSE_URL))
-    discourse_soup = BeautifulSoup(discourse_html, "html.parser")
-    discourse_texts = [tag.get_text(strip=True) for tag in discourse_soup.find_all(['p', 'div', 'span', 'li']) if len(tag.get_text(strip=True)) > 50]
-    discourse_images = [requests.compat.urljoin(DISCOURSE_URL, img['src']) for img in discourse_soup.find_all('img', src=True)]
+def embed_chunks(texts: List[str]):
+    texts = [t[:8191] for t in texts]
+    response = openai.Embedding.create(input=texts, model=EMBED_MODEL)
+    return [d['embedding'] for d in response['data']]
 
-    global source_data
-    source_data = []
+# Load and embed all chunks
+print("Indexing HTML content...")
+load_html_chunks()
+doc_embeddings = embed_chunks(docs)
+index = faiss.IndexFlatL2(DIMENSION)
+index.add(np.array(doc_embeddings).astype('float32'))
 
-    def add_entry(text, src):
-        if text and len(text) > 50:
-            emb = model.encode(text, convert_to_tensor=True)
-            source_data.append({"source": src, "text": text, "embedding": emb})
+@app.post("/answer/")
+async def answer_question(
+    text: str = Form(...),
+    link: Optional[str] = Form(None),
+    image: Optional[UploadFile] = None
+):
+    # OCR from image if provided
+    image_text = ""
+    if image:
+        try:
+            content = await image.read()
+            image_obj = Image.open(io.BytesIO(content))
+            image_text = pytesseract.image_to_string(image_obj)
+        except Exception as e:
+            return JSONResponse({"error": f"Image processing failed: {str(e)}"}, status_code=400)
 
-    for t in tds_texts:
-        add_entry(t, "tds")
+    full_query = f"{text}\n{image_text}".strip()
 
-    for url in tds_images:
-        text = ocr_image_from_url(url)
-        add_entry(text, "tds_image")
+    # Embed user query
+    query_embedding = openai.Embedding.create(
+        input=full_query[:8191],
+        model=EMBED_MODEL
+    )["data"][0]["embedding"]
 
-    for t in discourse_texts:
-        add_entry(t, "discourse")
+    # Filter based on link (if provided)
+    mask = [True] * len(docs)
+    if link:
+        keyword = link.split("/")[-1].replace(".html", "")
+        mask = [keyword in os.path.basename(src) for src in doc_sources]
 
-    for url in discourse_images:
-        text = ocr_image_from_url(url)
-        add_entry(text, "discourse_image")
+    filtered_docs = [d for d, m in zip(docs, mask) if m]
+    filtered_sources = [s for s, m in zip(doc_sources, mask) if m]
+    filtered_embeddings = [e for e, m in zip(doc_embeddings, mask) if m]
 
-def find_best_matches(question_text, top_k=2):
-    q_embed = model.encode(question_text, convert_to_tensor=True)
-    scores = [(util.pytorch_cos_sim(q_embed, item["embedding"]).item(), item) for item in source_data]
-    scores.sort(reverse=True, key=lambda x: x[0])
-    return scores[:top_k]
+    if not filtered_docs:
+        return JSONResponse({"error": "No matching content found for the given link."}, status_code=404)
 
-@app.route("/api/", methods=["POST"])
-def answer():
-    data = request.get_json()
-    question = data.get("question", "")
-    base64_img = data.get("image", "")
+    # Create temporary FAISS index
+    temp_index = faiss.IndexFlatL2(DIMENSION)
+    temp_index.add(np.array(filtered_embeddings).astype('float32'))
+    D, I = temp_index.search(np.array([query_embedding]).astype('float32'), 5)
 
-    if not question and not base64_img:
-        return jsonify({"error": "Please provide a question or an image."}), 400
+    top_chunks = [{"text": filtered_docs[i], "url": filtered_sources[i]} for i in I[0]]
 
-    combined_input = question
+    # Prepare RAG-style prompt
+    context_block = "\n\n".join([c["text"] for c in top_chunks])
+    prompt = f"""You are a helpful assistant. Use the context below to answer the user's question.
 
-    if base64_img:
-        image_text = ocr_image_from_base64(base64_img)
-        if image_text:
-            combined_input += " " + image_text
+Context:
+{context_block}
 
-    top_matches = find_best_matches(combined_input)
+Question:
+{text}
 
-    if not top_matches:
-        return jsonify({
-            "answer": "Sorry, I couldn’t find a relevant answer.",
-            "links": []
-        })
+Answer:"""
 
-    answer_texts = [match[1]["text"] for match in top_matches]
-    links = []
-    for txt in answer_texts:
-        found_links = re.findall(r'https?://[^\s")\]]+', txt)
-        links.extend(found_links)
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
+    )
 
-    return jsonify({
-        "answer": " ".join(answer_texts),
-        "links": [{"url": l, "text": "Reference"} for l in list(set(links))[:3]]
-    })
+    answer_text = response['choices'][0]['message']['content'].strip()
 
-if __name__ == "__main__":
-    print("Loading data before starting server...")
-    load_data()
-    print("Data loaded. Starting server.")
-    app.run(debug=True, host="0.0.0.0", port=5000)
-
+    return {
+        "answer": answer_text,
+        "link": top_chunks
+    }

@@ -1,0 +1,5 @@
+# HTTrack Website Copier Cookie File
+# This file format is compatible with Netscape cookies
+discourse.onlinedegree.iitm.ac.in	TRUE	/	FALSE	1999999999	destination_url	https%3A%2F%2Fdiscourse.onlinedegree.iitm.ac.in%2Fcategories
+discourse.onlinedegree.iitm.ac.in	TRUE	/	FALSE	1999999999	SameSite	Lax
+

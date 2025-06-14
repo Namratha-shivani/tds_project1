@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>IITM-DSA Search</ShortName>
+  <Description>Search for posts on IITM-DSA</Description>
+  <Tags>discourse forum</Tags>
+    <Image type="image/png">https://europe1.discourse-cdn.com/flex013/uploads/iitm/optimized/3X/1/8/18057f852cd1b347f4f0a09449d49632e5fb7d45_2_32x32.svg</Image>
+  <Url type="application/opensearchdescription+xml" rel="self" template="https://discourse.onlinedegree.iitm.ac.in/opensearch.xml"/>
+  <Url type="text/html" template="https://discourse.onlinedegree.iitm.ac.in/search?q={searchTerms}"/>
+  <Query role="example" searchTerms="search term"/>
+</OpenSearchDescription>

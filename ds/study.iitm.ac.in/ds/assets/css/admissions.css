@@ -1,0 +1,169 @@
+.notificationText {
+    font-size: 0.9rem
+}
+
+#footer {
+    background-color: #B71006 !important;
+}
+
+.scrollToTop {
+    display: none;
+    position: fixed;
+    right: 30px;
+    bottom: 20px;
+    z-index: 99;
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+    border-radius: 10px;
+    padding: 15px;
+    outline: none;
+    border: none;
+}
+.scrollToLeft {
+    display: none;
+    position: fixed;
+    left: 30px;
+    bottom: 20px;
+    z-index: 99;
+    color: white;
+    cursor: pointer;
+    font-size: 0.8rem;
+    border-radius: 10px;
+    padding: 15px;
+    outline: none;
+    border: none;
+}
+
+.list-style-disc {
+    list-style-type: disc !important;
+}
+.list-style-number {
+    list-style-type: decimal !important;
+}
+
+.table {
+    border: 0.5px solid #777777;
+  }
+  .table-bordered > thead > tr > th,
+  .table-bordered > tbody > tr > th,
+  .table-bordered > tfoot > tr > th,
+  .table-bordered > thead > tr > td,
+  .table-bordered > tbody > tr > td,
+  .table-bordered > tfoot > tr > td {
+     border: 0.5px solid #777777;
+  }
+
+small-text {
+    font-size: 0.9rem;
+}
+
+.footer-text {
+    font-size: 0.9rem;
+}
+
+.xl\+notification {
+    display: block;
+}
+
+.xl-notification {
+    display: none;
+}
+
+.entry-check {
+    flex-basis: 4%;
+}
+
+.entry-content {
+    flex-basis: 96%;
+}
+
+.text-small {
+    font-size: 0.8rem;
+}
+
+@media screen and (max-width: 768px) {
+    .entry-check {
+        flex-basis: 5%;
+    }
+    .entry-content {
+        flex-basis: 95%;
+    }
+}
+
+@media screen and (max-width: 573px) {
+    p,a,b,span,button,td, div {
+        font-size: 1.25rem;
+    }
+    .text-small {
+        font-size: 1rem;
+    }
+    .notificationText {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    small-text {
+        font-size: 1rem;
+    }
+    .xl\+notification {
+        display: none;
+    }
+    .xl-notification {
+        display: block;
+    }
+    .remindMe {
+        display: flex;
+        justify-content: center;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    .landingImage {
+        padding-bottom: 3rem;
+    }
+    .directorText {
+        text-align: center;
+    }
+    .center-xs {
+        align-items: center;
+    }
+    .keyFeatureImage {
+        padding-bottom: 1rem;
+    }
+    .directorImage {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 2rem;
+    }
+    .footer-text {
+        font-size: 1rem;
+    }
+    .footer-text-small {
+        font-size: 0.9rem;
+    }
+    .remindText {
+        text-align: center;
+        width: 100%;
+    }
+    .footer-hidden {
+        display: block;
+    }
+    .entry-check {
+        flex-basis: 7%;
+    }
+    .entry-content {
+        flex-basis: 93%;
+    }
+}
+
+
+.table-new {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  background-color: transparent;
+}
+.table-new th,
+.table-new td {
+  padding-bottom: 0.5rem;
+  vertical-align: top;
+}
+

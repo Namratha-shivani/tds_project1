@@ -1,0 +1,30 @@
+.table-box {
+    /* border: 0.5px solid #777777; */
+  }
+  .table-bordered > thead > tr > th,
+  .table-bordered > tbody > tr > th,
+  .table-bordered > tfoot > tr > th,
+  .table-bordered > thead > tr > td,
+  .table-bordered > tbody > tr > td,
+  .table-bordered > tfoot > tr > td {
+     border-bottom: 0.5px solid #777777;
+     min-width: 150px;
+  }
+
+.table-row{
+    border-bottom: 1px solid #ccc; 
+    th, td {
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+      min-width: 150px;
+      max-width: 400px;
+      padding-right: 20px;
+    }
+    table tr td:first-child {
+      padding-left: 0px !important;
+    }
+    
+    table thead tr th:first-child {
+      padding-left: 0px !important;
+    }
+}
