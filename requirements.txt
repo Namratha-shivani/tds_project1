@@ -1,7 +1,3 @@
 flask
-openai
-bs4
-requests
-tiktoken
-python-dotenv
-PyMuPDF
+playwright
+
