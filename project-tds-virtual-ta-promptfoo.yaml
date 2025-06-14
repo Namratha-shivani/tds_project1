@@ -3,7 +3,7 @@ description: "TDS Virtual TA Project Sample (but not the actual evaluation) Ques
 providers:
   - id: https
     config:
-      url: https://tds-project1.fly.dev/api/
+      url: https://opulent-goggles-7qjvxr4pqwrfx679-5000.app.github.dev
       method: POST
       headers:
         Content-Type: application/json
