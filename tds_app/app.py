@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 from .loader import load_documents
-from retriever import get_retriever
-from answer_chain import create_chain
-from ocr import extract_text
+from .retriever import get_retriever
+from .answer_chain import create_chain
+from .ocr import extract_text
 
 # Setup
 chunks = load_documents()
